@@ -2,10 +2,11 @@
 
 use Test::More tests => 9;
 
-use Data::Foswiki;
+#test only importing deserialise - make the other full
+use Data::Foswiki qw(deserialise);
 
 my $topic;
-$topic = Data::Foswiki::deserialise();
+$topic = deserialise();
 ok( $topic->{TEXT} eq '', 'no parameters' );
 
 ok( defined( Data::Foswiki::deserialise('') ), 'empty string' );

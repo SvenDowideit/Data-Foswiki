@@ -4,6 +4,9 @@ use 5.006;
 use strict;
 use warnings;
 
+use Exporter 'import';
+our @EXPORT_OK = qw(serialise deserialise);
+
 =head1 NAME
 
 Data::Foswiki - Read and Write Foswiki topics
@@ -25,9 +28,9 @@ Quickly read and write Foswiki topics into a hash
     #read
     my $fh;
     open($fh, '<', '/var/lib/foswiki/data/System/FAQSimultaneousEdits.txt') or die 'open failure';
-    my $topic_text = <$fh>;
+    my @topic_text = <$fh>;
     close($fh);
-    my $topic = deserialise($topic_text);
+    my $topic = Data::Foswiki::deserialise(@topic_text);
     
     $topic->{TOPICINFO}{author} = 'NewUser';
     $topic->{PARENT}{name} = 'WebHome';
@@ -43,7 +46,7 @@ Quickly read and write Foswiki topics into a hash
     
     #write
     open($fh, '>', '/var/lib/foswiki/data/System/FAQNewFaq.txt') or die 'write failure';
-    print $fh serialise($topic);
+    print $fh Data::Foswiki::serialise($topic);
     close($fh);
     
 
@@ -54,7 +57,7 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 deserialise($text) -> $hash_ref
+=head2 deserialise($text|@stringarray) -> $hash_ref
 
 Parse a string, or array of strings and convert into a hash of the Foswiki topic's data
 
@@ -285,6 +288,11 @@ L<http://search.cpan.org/dist/Data-Foswiki/>
 
 
 =head1 ACKNOWLEDGEMENTS
+
+=head1 TODO
+
+make an XS version, and try a few different approaches to parsing and then benchmark them
+this would mean making this module into a facade to the other implementations.
 
 
 =head1 LICENSE AND COPYRIGHT
