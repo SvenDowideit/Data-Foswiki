@@ -2,6 +2,7 @@ Build.PL
 Changes
 Debian_CPANTS.txt
 ignore.txt
+INSTALL
 lib/Data/Foswiki.pm
 LICENSE
 Makefile.PL

@@ -1,14 +1,16 @@
-#!/usr/bin/perl
-use strict;
-use warnings;
-
+## in a separate test file
 use Test::More;
 
-eval "use Test::Pod::Spelling::CommonMistakes";
-if ($@) {
-    plan skip_all =>
-      'Test::Pod::Spelling::CommonMistakes required for testing POD';
-}
-else {
-    all_pod_files_ok();
-}
+eval 'use Test::Spelling;';
+
+plan( skip_all => 'Test::Spelling not installed; skipping' ) if $@;
+add_stopwords(<DATA>);
+all_pod_files_spelling_ok();
+
+
+__END__
+Dowideit
+SvenDowideit
+Foswiki
+foswiki
+irc

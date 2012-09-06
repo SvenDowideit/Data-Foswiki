@@ -141,7 +141,9 @@ sub deserialise {
 
 =head2 serialise($hashref) -> string
 
-TODO: wantarray..
+Serialise into a foswiki 'embedded' formatted string, ready for writing to disk.
+
+Note: this does not take care of updating the topic revision and date data
 
 =cut
 
@@ -170,6 +172,7 @@ sub serialise {
         }
     }
 
+    #TODO: how about using wantarray to avoid the join?
     return join( "\n", @text );
 }
 
@@ -258,46 +261,22 @@ automatically be notified of progress on your bug as I make changes.
 
 =head1 SUPPORT
 
-You can find documentation for this module with the perldoc command.
-
-    perldoc Data::Foswiki
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Data-Foswiki>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Data-Foswiki>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Data-Foswiki>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Data-Foswiki/>
-
-=back
+Foswiki support can be found in the #foswiki irc channel on L<irc://irc.freenode.net>, 
+or from SvenDowideit L<mailto:SvenDowideit@fosiki.com>
 
 
 =head1 ACKNOWLEDGEMENTS
 
-=head1 TODO
+=head1 TO DO
 
 make an XS version, and try a few different approaches to parsing and then benchmark them
 this would mean making this module into a facade to the other implementations.
 
-is it faster not to modify the array? (just keep startText and endText indexes?)
+is it faster not to modify the array? (just keep start and end Text indexes?)
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2012 Sven Dowideit.
+Copyright 2012 Sven Dowideit SvenDowideit@fosiki.com.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

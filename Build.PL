@@ -19,7 +19,7 @@ my $builder = Module::Build->new(
         'Test::Pod' => 0,
         'Test::Pod::Coverage' => 0,
         'Pod::Coverage' => 0,
-        'Test::Pod::Spelling::CommonMistakes' => 0,
+        'Test::Spelling' => 0,
         'Test::Kwalitee' => 0,
     },
     configure_requires => { 'Module::Build' => 0.38 },
