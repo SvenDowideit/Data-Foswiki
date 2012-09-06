@@ -13,11 +13,8 @@ README
 t/00-load.t
 t/boilerplate.t
 t/topic.t
-xt/00-load.t
 xt/99-kwalitee.t
 xt/99-manifest.t
 xt/99-pod-coverage.t
 xt/99-pod.t
 xt/99-spelling.t
-xt/boilerplate.t
-xt/topic.t
