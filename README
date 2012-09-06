@@ -1,55 +1,100 @@
-Data-Foswiki
+NAME
+    Data::Foswiki - Read and Write Foswiki topics
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+VERSION
+    Version 0.01
 
-A README file is required for CPAN modules since CPAN extracts the README
-file from a module distribution so that people browsing the archive
-can use it to get an idea of the module's uses. It is usually a good idea
-to provide version information here so that people can decide whether
-fixes for the module are worth downloading.
+SYNOPSIS
+    Quickly read and write Foswiki topics into a hash
 
+        use Data::Foswiki;
 
-INSTALLATION
+        #read
+        my $fh;
+        open($fh, '<', '/var/lib/foswiki/data/System/FAQSimultaneousEdits.txt') or die 'open failure';
+        my @topic_text = <$fh>;
+        close($fh);
+        my $topic = Data::Foswiki::deserialise(@topic_text);
+    
+        $topic->{TOPICINFO}{author} = 'NewUser';
+        $topic->{PARENT}{name} = 'WebHome';
+    
+        $topic->{TEXT} = "Some new text\n\n".$topic->{TEXT};
+        undef $topic->{TOPICMOVED};
+    
+        $topic->{FIELD}{TopicTitle}{attributes} = 'H';
+    
+        #add a new field that is not part of the form definition - if edited within foswiki, it willbe removed
+        #but its useful for importing
+        $topic->{FIELD}{NewField}{value} = 'test';
+    
+        #write
+        open($fh, '>', '/var/lib/foswiki/data/System/FAQNewFaq.txt') or die 'write failure';
+        print $fh Data::Foswiki::serialise($topic);
+        close($fh);
 
-To install this module, run the following commands:
+EXPORT
+    A list of functions that can be exported. You can delete this section if
+    you don't export anything, such as for a purely object-oriented module.
 
-	perl Build.PL
-	./Build
-	./Build test
-	./Build install
+SUBROUTINES/METHODS
+  deserialise($text|@stringarray) -> $hash_ref
+    Parse a string, or array of strings and convert into a hash of the
+    Foswiki topic's data
 
-SUPPORT AND DOCUMENTATION
+    (apparently Perl can be faster reading a file into an array)
 
-After installing, you can find documentation for this module with the
-perldoc command.
+  serialise($hashref) -> string
+    TODO: wantarray..
 
-    perldoc Data::Foswiki
+AUTHOR
+    Sven Dowideit, "<SvenDowideit at fosiki.com>"
 
-You can also look for information at:
+BUGS
+    Please report any bugs or feature requests to "bug-data-foswiki at
+    rt.cpan.org", or through the web interface at
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Data-Foswiki>. I will be
+    notified, and then you'll automatically be notified of progress on your
+    bug as I make changes.
 
-    RT, CPAN's request tracker (report bugs here)
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Data-Foswiki
+SUPPORT
+    You can find documentation for this module with the perldoc command.
 
-    AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/Data-Foswiki
+        perldoc Data::Foswiki
 
-    CPAN Ratings
-        http://cpanratings.perl.org/d/Data-Foswiki
+    You can also look for information at:
 
-    Search CPAN
-        http://search.cpan.org/dist/Data-Foswiki/
+    *   RT: CPAN's request tracker (report bugs here)
 
+        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Data-Foswiki>
+
+    *   AnnoCPAN: Annotated CPAN documentation
+
+        <http://annocpan.org/dist/Data-Foswiki>
+
+    *   CPAN Ratings
+
+        <http://cpanratings.perl.org/d/Data-Foswiki>
+
+    *   Search CPAN
+
+        <http://search.cpan.org/dist/Data-Foswiki/>
+
+ACKNOWLEDGEMENTS
+TODO
+    make an XS version, and try a few different approaches to parsing and
+    then benchmark them this would mean making this module into a facade to
+    the other implementations.
+
+    is it faster not to modify the array? (just keep startText and endText
+    indexes?)
 
 LICENSE AND COPYRIGHT
+    Copyright 2012 Sven Dowideit.
 
-Copyright (C) 2012 Sven Dowideit
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of either: the GNU General Public License as published
+    by the Free Software Foundation; or the Artistic License.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
+    See http://dev.perl.org/licenses/ for more information.
 

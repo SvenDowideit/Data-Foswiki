@@ -6,16 +6,28 @@ use Module::Build;
 my $builder = Module::Build->new(
     module_name         => 'Data::Foswiki',
     license             => 'perl',
+    create_license       => 1,
     dist_author         => q{Sven Dowideit <SvenDowideit@fosiki.com>},
     dist_version_from   => 'lib/Data/Foswiki.pm',
+    create_readme       => 1,
     build_requires => {
         'Test::More' => 0,
+#    },
+#    #mmm, does not exist?
+#    build_recommends => {
+        'Test::CheckManifest' => '0.9',
+        'Test::Pod' => 0,
+        'Test::Pod::Coverage' => 0,
+        'Pod::Coverage' => 0,
+        'Test::Pod::Spelling::CommonMistakes' => 0,
+        'Test::Kwalitee' => 0,
     },
+    configure_requires => { 'Module::Build' => 0.38 },
     requires => {
         'perl' => 5.006,
     },
-    add_to_cleanup      => [ 'Data-Foswiki-*' ],
-    create_makefile_pl => 'traditional',
+    add_to_cleanup      => [ 'Data-Foswiki-*', 't/*~', 't/*.bak' ],
+    create_makefile_pl => 'small',
 );
 
 $builder->create_build_script();
