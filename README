@@ -45,7 +45,11 @@ SUBROUTINES/METHODS
     (apparently Perl can be faster reading a file into an array)
 
   serialise($hashref) -> string
-    TODO: wantarray..
+    Serialise into a foswiki 'embedded' formatted string, ready for writing
+    to disk.
+
+    Note: this does not take care of updating the topic revision and date
+    data
 
 AUTHOR
     Sven Dowideit, "<SvenDowideit at fosiki.com>"
@@ -58,39 +62,21 @@ BUGS
     bug as I make changes.
 
 SUPPORT
-    You can find documentation for this module with the perldoc command.
-
-        perldoc Data::Foswiki
-
-    You can also look for information at:
-
-    *   RT: CPAN's request tracker (report bugs here)
-
-        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Data-Foswiki>
-
-    *   AnnoCPAN: Annotated CPAN documentation
-
-        <http://annocpan.org/dist/Data-Foswiki>
-
-    *   CPAN Ratings
-
-        <http://cpanratings.perl.org/d/Data-Foswiki>
-
-    *   Search CPAN
-
-        <http://search.cpan.org/dist/Data-Foswiki/>
+    Foswiki support can be found in the #foswiki irc channel on
+    <irc://irc.freenode.net>, or from SvenDowideit
+    <mailto:SvenDowideit@fosiki.com>
 
 ACKNOWLEDGEMENTS
-TODO
+TO DO
     make an XS version, and try a few different approaches to parsing and
     then benchmark them this would mean making this module into a facade to
     the other implementations.
 
-    is it faster not to modify the array? (just keep startText and endText
+    is it faster not to modify the array? (just keep start and end Text
     indexes?)
 
 LICENSE AND COPYRIGHT
-    Copyright 2012 Sven Dowideit.
+    Copyright 2012 Sven Dowideit SvenDowideit@fosiki.com.
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of either: the GNU General Public License as published
