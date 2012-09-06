@@ -99,17 +99,17 @@ sub deserialise {
         $trailingMeta = 1;
         my $type   = $1;
         my $params = $2;
+        pop(@str);
+
+        #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
+        next if (($type eq 'TOPICINFO') || ($type eq 'TOPICINFO'));
+
+        my %meta;
         if ( $type eq 'FORM' ) {
-            my $type   = $1;
-            my $params = $2;
-            my %meta;
             _parse_params( $type, $params, \%meta, qw/name/ );
             $topic{$type} = \%meta;
         }
         else {
-            my $type   = $1;
-            my $params = $2;
-            my %meta;
             _parse_params( $type, $params, \%meta );
             if ( exists( $meta{name} ) ) {
                 $topic{$type}{ $meta{name} } = \%meta;
@@ -118,7 +118,6 @@ sub deserialise {
                 $topic{$type} = \%meta;
             }
         }
-        pop(@str);
     }
 
     #there is an extra newline added between TEXT and any trailing meta
@@ -294,6 +293,7 @@ L<http://search.cpan.org/dist/Data-Foswiki/>
 make an XS version, and try a few different approaches to parsing and then benchmark them
 this would mean making this module into a facade to the other implementations.
 
+is it faster not to modify the array? (just keep startText and endText indexes?)
 
 =head1 LICENSE AND COPYRIGHT
 
