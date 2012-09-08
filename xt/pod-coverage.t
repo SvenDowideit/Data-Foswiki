@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Carp;
 
 eval {
     require Test::Pod::Coverage;
@@ -8,7 +9,7 @@ eval {
     Test::Pod::Coverage->import();
 };
 
-plan skip_all => "Test::Pod::Coverage $min_tpc required for testing POD coverage"
+plan skip_all => "Test::Pod::Coverage 1.08 required for testing POD coverage"
     if $@;
 
 # Test::Pod::Coverage doesn't require a minimum Pod::Coverage version,
@@ -20,7 +21,7 @@ eval {
 };
 
 
-plan skip_all => "Pod::Coverage $min_pc required for testing POD coverage"
+plan skip_all => "Pod::Coverage 0.18 required for testing POD coverage"
     if $@;
 
 all_pod_coverage_ok();

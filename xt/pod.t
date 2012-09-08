@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Carp;
 
 eval {
     require Test::Pod;
@@ -10,6 +11,6 @@ eval {
     Test::Pod->import();
 };
 
-plan skip_all => "Test::Pod $min_tp required for testing POD" if $@;
+plan skip_all => "Test::Pod 1.22 required for testing POD" if $@;
 
 all_pod_files_ok();
