@@ -1,5 +1,6 @@
 #!perl -T
 
+use strict;
 use Test::More tests => 9;
 
 #test only importing deserialise - make the other full
