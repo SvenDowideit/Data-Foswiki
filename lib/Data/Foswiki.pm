@@ -95,7 +95,7 @@ sub deserialise {
 
     #then the trailing META
     my $trailingMeta;
-    while ( ( $#str >= 0 ) && $str[$#str] =~ /\%META:(.*?){(.*?)}\%\n?$/ ) {
+    while ( ( $#str > -1 ) && $str[-1] =~ /\%META:(.*?){(.*?)}\%\n?$/ ) {
         $trailingMeta = 1;
         my $type   = $1;
         my $params = $2;
@@ -121,7 +121,7 @@ sub deserialise {
     }
 
     #there is an extra newline added between TEXT and any trailing meta
-    pop(@str) if ( $trailingMeta && $str[$#str] =~ /^\n?$/ );
+    pop(@str) if ( $trailingMeta && $str[-1] =~ /^\n?$/ );
 
     #and thus we're left with the topic text
     if ( defined( $str[0] ) ) {
@@ -185,6 +185,7 @@ sub _parse_params {
     else {
         map { $meta->{$_} = $args->{$_} } keys(%$args);
     }
+    return;
 }
 
 #from Foswiki::Meta
