@@ -63,40 +63,48 @@ Parse a string, or array of strings and convert into a hash of the Foswiki topic
 
 (apparently Perl can be faster reading a file into an array)
 
+if you pass in an undef / empty string, you will get undef back
+
 =cut
 
-my $METAINFOregex = qr/^\%META:(TOPICINFO){(.*)}\%\n?$/o;
+my $METAINFOregex   = qr/^\%META:(TOPICINFO){(.*)}\%\n?$/o;
 my $METAPARENTregex = qr/^\%META:(TOPICPARENT){(.*)}\%\n?$/o;
-my $METAregex = qr/^\%META:(\S*){(.*)}\%\n?$/o;
+my $METAregex       = qr/^\%META:(\S*){(.*)}\%\n?$/o;
 
 sub deserialise {
     my $topic;
 
+    return $topic unless ( $#_ >= 0 );
+
     #convert a string into an array
     if ( $#_ == 0 ) {
-        return deserialise(split( /\n/, $_[0] ));
+        return $topic if ( $_[0] eq '' );
+        if ( $_[0] =~ /\n/ ) {
+            return deserialise( split( /\n/, $_[0] ) );
+        }
     }
-    
-    my $start = 0;
-    my $end = -1;
 
-    #I can test $_[$start] rather than defined($_[$start]) 
+    my $start = 0;
+    my $end   = -1;
+
+    #I can test $_[$start] rather than defined($_[$start])
     #  because an empty line still would not match the regex
     # first get rid of the leading META
-    if ( $_[$start] && $_[$start] =~ $METAINFOregex) {
-            $topic->{$1} = _readKeyValues($2);
-            $start++;
+    if ( $_[$start] && $_[$start] =~ $METAINFOregex ) {
+        $topic->{$1} = _readKeyValues($2);
+        $start++;
     }
-    if ( $_[$start] && $_[$start] =~ $METAPARENTregex) {
-            $topic->{$1} = _readKeyValues($2);
-            $start++;
+    if ( $_[$start] && $_[$start] =~ $METAPARENTregex ) {
+        $topic->{$1} = _readKeyValues($2);
+        $start++;
     }
 
     #then the trailing META
     my $trailingMeta;
     while ( $_[$end] && $_[$end] =~ $METAregex ) {
-        #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
-        last if (($1 eq 'TOPICINFO') || ($1 eq 'TOPICPARENT'));
+
+#should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
+        last if ( ( $1 eq 'TOPICINFO' ) || ( $1 eq 'TOPICPARENT' ) );
 
         $trailingMeta = 1;
         $end--;
@@ -106,7 +114,7 @@ sub deserialise {
             $topic->{$1} = $meta;
         }
         else {
-            if ( exists( $meta->{name} ) && $1 ne 'FORM') {
+            if ( exists( $meta->{name} ) && $1 ne 'FORM' ) {
                 $topic->{$1}{ $meta->{name} } = $meta;
             }
             else {
@@ -117,11 +125,13 @@ sub deserialise {
 
     #there is an extra newline added between TEXT and any trailing meta
     $end-- if ( $trailingMeta && $_[$end] =~ /^\n?$/o );
-    
-    if ($_[$start]) {
-        #TODO: not joining and just returning an arrayref is ~200 topics/s faster again
-        #but leaves the user to work out if there are \n's
-        $topic->{TEXT} = join((( $_[$start] =~ /\n/o )?'':"\n"), @_[$start, $end]);
+
+    if ( $_[$start] ) {
+
+ #TODO: not joining and just returning an arrayref is ~200 topics/s faster again
+ #but leaves the user to work out if there are \n's
+        $topic->{TEXT} =
+          join( ( ( $_[$start] =~ /\n/o ) ? '' : "\n" ), @_[ $start, $end ] );
     }
     return $topic;
 }
@@ -168,14 +178,15 @@ sub serialise {
 # SMELL: duplication of Foswiki::Attrs, using a different
 # system of escapes :-(
 sub _readKeyValues {
-    my @arr = split(/="([^"]*)"\s*/, $_[0]);
+    my @arr = split( /="([^"]*)"\s*/, $_[0] );
+
     #if the last attribute is an empty string, we're a bit naf
     my $count = $#arr;
-    push(@arr, '') unless ($count % 2);
+    push( @arr, '' ) unless ( $count % 2 );
     my $res;
-    for (my $i=1;$i<=$count;$i=$i+2) {
+    for ( my $i = 1 ; $i <= $count ; $i = $i + 2 ) {
         $arr[$i] =~ s/%([\da-f]{2})/chr(hex($1))/geio;
-        $res->{$arr[$i-1]} = $arr[$i];
+        $res->{ $arr[ $i - 1 ] } = $arr[$i];
     }
 
     return $res;

@@ -61,6 +61,7 @@ if (1==2) {
     #print STDERR Dumper($results);
 }
 
+my $seconds = 5;
 my $t = countit(5, sub {
             foreach my $topic (@topics) {
                 my $data = Data::Foswiki::deserialise(@$topic);
@@ -68,6 +69,6 @@ my $t = countit(5, sub {
             });
 my $count = $t->iters;
 print STDERR "$count loops of other code took:",timestr($t),"\n";
-ok($count > 4000, 'too slow');
+ok($count > ($seconds*4000), 'too slow (running on my quiet server)');
 
 1;

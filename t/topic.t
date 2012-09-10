@@ -9,9 +9,10 @@ use Data::Foswiki::Test5 qw(deserialise);
 
 my $topic;
 $topic = deserialise();
-ok( $topic->{TEXT} eq '', 'no parameters' );
+ok( !defined($topic), 'no parameters' );
 
-ok( defined( Data::Foswiki::deserialise('') ), 'empty string' );
+$topic = deserialise();
+ok( !defined($topic), 'empty string' );
 ok(
     defined(
         Data::Foswiki::deserialise(

@@ -4,11 +4,6 @@ Debian_CPANTS.txt
 ignore.txt
 INSTALL
 lib/Data/Foswiki.pm
-lib/Data/Foswiki/Test.pm
-lib/Data/Foswiki/Test2.pm
-lib/Data/Foswiki/Test3.pm
-lib/Data/Foswiki/Test4.pm
-lib/Data/Foswiki/Test5.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
