@@ -7,6 +7,7 @@ use Carp;
 use Data::Dumper;
 use Data::Foswiki;
 use Data::Foswiki::Test;
+use Data::Foswiki::Test2;
 
 eval {
     require Benchmark;
@@ -30,6 +31,7 @@ my $results = timethese(-2,
     {
         'Foswiki::deserialise' => sub {my $data = Data::Foswiki::deserialise(@topic) },
         'Foswiki::Test::deserialise' => sub { my $data = Data::Foswiki::Test::deserialise(@topic) },
+        'Foswiki::Test2::deserialise' => sub { my $data = Data::Foswiki::Test2::deserialise(@topic) },
     },
     'none'
 );

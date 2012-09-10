@@ -5,6 +5,7 @@ ignore.txt
 INSTALL
 lib/Data/Foswiki.pm
 lib/Data/Foswiki/Test.pm
+lib/Data/Foswiki/Test2.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files

@@ -4,7 +4,8 @@ use strict;
 use Test::More tests => 9;
 
 #test only importing deserialise - make the other full
-use Data::Foswiki qw(deserialise);
+use Data::Foswiki;
+use Data::Foswiki::Test2 qw(deserialise);
 
 my $topic;
 $topic = deserialise();
@@ -28,7 +29,7 @@ ok( $topic->{TEXT} eq "one\ntwo", 'test linefeed combination' );
 #my $tt = Data::Foswiki::deserialise("one\ntwo");
 #use Data::Dumper; print STDERR Dumper($tt);
 
-$topic = Data::Foswiki::deserialise(<DATA>);
+$topic = deserialise(<DATA>);
 
 ok( $topic->{TOPICINFO}{author} eq 'ProjectContributor', 'loaded TOPICINFO' );
 ok( $topic->{TOPICMOVED}{from}  eq 'SimultaneousEdits',  'loaded TOPICMOVED' );
