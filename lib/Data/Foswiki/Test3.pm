@@ -1,4 +1,4 @@
-package Data::Foswiki::Test2;
+package Data::Foswiki::Test3;
 
 use 5.006;
 use strict;
@@ -23,7 +23,7 @@ our $VERSION = '0.01';
 
 Quickly read and write Foswiki topics into a hash
 
-    use Data::Foswiki::Test2;
+    use Data::Foswiki::Test3;
 
     #read
     my $fh;
@@ -78,13 +78,13 @@ sub deserialise {
     my $end = -1;
 
     # first get rid of the leading META
-    if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICINFO){(.*?)}\%\n?$/ ) {
+    if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICINFO){(.*)}\%\n?$/ ) {
         my $type   = $1;
         my $params = $2;
         $topic{$type} = _readKeyValues($params);
         $start++;
     }
-    if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICPARENT){(.*?)}\%\n?$/ )
+    if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICPARENT){(.*)}\%\n?$/ )
     {
         my $type   = $1;
         my $params = $2;
@@ -94,7 +94,7 @@ sub deserialise {
 
     #then the trailing META
     my $trailingMeta;
-    while ( ( $str[$end] ) && $str[$end] =~ /\%META:(.*?){(.*?)}\%\n?$/ ) {
+    while ( ( $str[$end] ) && $str[$end] =~ /\%META:(\S*){(.*)}\%\n?$/ ) {
         $trailingMeta = 1;
         my $type   = $1;
         my $params = $2;
@@ -172,19 +172,6 @@ sub serialise {
 
     #TODO: how about using wantarray to avoid the join?
     return join( "\n", @text );
-}
-
-sub _parse_params {
-    my ( $metaname, $str, $meta, @attrs ) = @_;
-    my $args = _readKeyValues($str);
-    if ( $#attrs >= 0 ) {
-        map { $meta->{$_} = $args->{$_} if ( exists( $args->{$_} ) ); } @attrs;
-    }
-    else {
-        #map { $meta->{$_} = $args->{$_} } keys(%$args);
-        $meta = $args;
-    }
-    return;
 }
 
 #from Foswiki::Meta
