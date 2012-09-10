@@ -30,7 +30,7 @@ Quickly read and write Foswiki topics into a hash
     open($fh, '<', '/var/lib/foswiki/data/System/FAQSimultaneousEdits.txt') or die 'open failure';
     my @topic_text = <$fh>;
     close($fh);
-    my $topic = Data::Foswiki::Test::deserialise(@topic_text);
+    my $topic = Data::Foswiki::Test2::deserialise(@topic_text);
     
     $topic->{TOPICINFO}{author} = 'NewUser';
     $topic->{PARENT}{name} = 'WebHome';
@@ -81,18 +81,14 @@ sub deserialise {
     if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICINFO){(.*?)}\%\n?$/ ) {
         my $type   = $1;
         my $params = $2;
-        my %meta;
-        _parse_params( $type, $params, \%meta, qw/author date version format/ );
-        $topic{$type} = \%meta;
+        $topic{$type} = _readKeyValues($params);
         $start++;
     }
     if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICPARENT){(.*?)}\%\n?$/ )
     {
         my $type   = $1;
         my $params = $2;
-        my %meta;
-        _parse_params( $type, $params, \%meta, qw/name/ );
-        $topic{$type} = \%meta;
+        $topic{$type} = _readKeyValues($params);
         $start++;
     }
 
@@ -107,18 +103,16 @@ sub deserialise {
         #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
         next if (($type eq 'TOPICINFO') || ($type eq 'TOPICPARENT'));
 
-        my %meta;
         if ( $type eq 'FORM' ) {
-            _parse_params( $type, $params, \%meta, qw/name/ );
-            $topic{$type} = \%meta;
+            $topic{$type} = _readKeyValues($params);
         }
         else {
-            _parse_params( $type, $params, \%meta );
-            if ( exists( $meta{name} ) ) {
-                $topic{$type}{ $meta{name} } = \%meta;
+            my $meta = _readKeyValues($params);
+            if ( exists( $meta->{name} ) ) {
+                $topic{$type}{ $meta->{name} } = $meta;
             }
             else {
-                $topic{$type} = \%meta;
+                $topic{$type} = $meta;
             }
         }
     }
@@ -187,7 +181,8 @@ sub _parse_params {
         map { $meta->{$_} = $args->{$_} if ( exists( $args->{$_} ) ); } @attrs;
     }
     else {
-        map { $meta->{$_} = $args->{$_} } keys(%$args);
+        #map { $meta->{$_} = $args->{$_} } keys(%$args);
+        $meta = $args;
     }
     return;
 }
