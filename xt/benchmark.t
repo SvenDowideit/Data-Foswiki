@@ -15,10 +15,14 @@ eval {
 
 plan skip_all => "Benchmark module needed for this test" if $@;
 
-my $releaseTopic = '/var/lib/foswiki/data/System/ReleaseNotes01x01.txt';
-plan skip_all => 'need a foswiki install at /var/lib/foswiki' unless (-e $releaseTopic);
+my @topicList = qw(
+                    /var/lib/foswiki/data/System/ReleaseNotes01x01.txt
+                    /var/lib/foswiki/data/System/NewUserTemplate.txt
+                    );
+my $topicPath = $topicList[1];
+plan skip_all => 'need a foswiki install at /var/lib/foswiki' unless (-e $topicPath);
 
-open(my $fh, '<', $releaseTopic) or die 'horribly';
+open(my $fh, '<', $topicPath) or die 'horribly';
 my @topic = <$fh>;
 close($fh);
 # ...or in two stages

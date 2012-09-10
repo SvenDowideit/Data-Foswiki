@@ -73,33 +73,36 @@ sub deserialise {
     if ( $#str == 0 ) {
         @str = split( /\n/, $str[0] );
     }
+    
+    my $start = 0;
+    my $end = -1;
 
     # first get rid of the leading META
-    if ( defined( $str[0] ) && $str[0] =~ /\%META:(TOPICINFO){(.*?)}\%\n?$/ ) {
+    if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICINFO){(.*?)}\%\n?$/ ) {
         my $type   = $1;
         my $params = $2;
         my %meta;
         _parse_params( $type, $params, \%meta, qw/author date version format/ );
         $topic{$type} = \%meta;
-        shift(@str);
+        $start++;
     }
-    if ( defined( $str[0] ) && $str[0] =~ /\%META:(TOPICPARENT){(.*?)}\%\n?$/ )
+    if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICPARENT){(.*?)}\%\n?$/ )
     {
         my $type   = $1;
         my $params = $2;
         my %meta;
         _parse_params( $type, $params, \%meta, qw/name/ );
         $topic{$type} = \%meta;
-        shift(@str);
+        $start++;
     }
 
     #then the trailing META
     my $trailingMeta;
-    while ( ( $#str > -1 ) && $str[-1] =~ /\%META:(.*?){(.*?)}\%\n?$/ ) {
+    while ( ( $str[$end] ) && $str[$end] =~ /\%META:(.*?){(.*?)}\%\n?$/ ) {
         $trailingMeta = 1;
         my $type   = $1;
         my $params = $2;
-        pop(@str);
+        $end--;
 
         #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
         next if (($type eq 'TOPICINFO') || ($type eq 'TOPICINFO'));
@@ -121,15 +124,16 @@ sub deserialise {
     }
 
     #there is an extra newline added between TEXT and any trailing meta
-    pop(@str) if ( $trailingMeta && $str[-1] =~ /^\n?$/ );
+    $end-- if ( $trailingMeta && $str[$end] =~ /^\n?$/ );
+    my @text = @str[$start, $end];
 
     #and thus we're left with the topic text
-    if ( defined( $str[0] ) ) {
+    if ( defined( $text[0] ) ) {
 
         #decide if the TEXT array already has \n at the ends
         my $separator = "\n";
         $separator = '' if ( $str[0] =~ /\n/ );
-        $topic{TEXT} = join( $separator, @str );
+        $topic{TEXT} = join( $separator, @text );
     }
     else {
 
