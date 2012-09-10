@@ -117,22 +117,12 @@ sub deserialise {
 
     #there is an extra newline added between TEXT and any trailing meta
     $end-- if ( $trailingMeta && $_[$end] =~ /^\n?$/o );
-    my @text = @_[$start, $end];
-
-    #and thus we're left with the topic text
-    if ( defined( $text[0] ) ) {
-
-        #decide if the TEXT array already has \n at the ends
-        my $separator = "\n";
-        $separator = '' if ( $_[0] =~ /\n/o );
-        $topic->{TEXT} = join( $separator, @text );
-        #$topic->{TEXT} = \@text;
+    
+    if ($_[$start]) {
+        #TODO: not joining and just returning an arrayref is ~200 topics/s faster again
+        #but leaves the user to work out if there are \n's
+        $topic->{TEXT} = join((( $_[$start] =~ /\n/o )?'':"\n"), @_[$start, $end]);
     }
-    else {
-
-        $topic->{TEXT} = '';
-    }
-
     return $topic;
 }
 
@@ -180,13 +170,14 @@ sub serialise {
 sub _readKeyValues {
     my @arr = split(/="([^"]*)"\s*/, $_[0]);
     #if the last attribute is an empty string, we're a bit naf
-    push(@arr, '') unless ($#arr % 2);
-    my $res = {@arr};
-    while (my ($key, $value) = each(%$res)) {
-        if ($value =~ s/%([\da-f]{2})/chr(hex($1))/geio) {
-            $res->{$key} = $value;
-        }
+    my $count = $#arr;
+    push(@arr, '') unless ($count % 2);
+    my $res;
+    for (my $i=1;$i<=$count;$i=$i+2) {
+        $arr[$i] =~ s/%([\da-f]{2})/chr(hex($1))/geio;
+        $res->{$arr[$i-1]} = $arr[$i];
     }
+
     return $res;
 }
 
