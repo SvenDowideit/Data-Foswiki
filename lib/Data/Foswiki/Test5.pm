@@ -1,4 +1,4 @@
-package Data::Foswiki::Test4;
+package Data::Foswiki::Test5;
 
 use 5.006;
 use strict;
@@ -9,7 +9,7 @@ our @EXPORT_OK = qw(serialise deserialise);
 
 =head1 NAME
 
-Data::Foswiki::Test4 - Read and Write Foswiki topics
+Data::Foswiki::Test5 - Read and Write Foswiki topics
 
 =head1 VERSION
 
@@ -23,7 +23,7 @@ our $VERSION = '0.01';
 
 Quickly read and write Foswiki topics into a hash
 
-    use Data::Foswiki::Test4;
+    use Data::Foswiki::Test5;
 
     #read
     my $fh;
@@ -70,30 +70,31 @@ my $METAPARENTregex = qr/^\%META:(TOPICPARENT){(.*)}\%\n?$/o;
 my $METAregex = qr/^\%META:(\S*){(.*)}\%\n?$/o;
 
 sub deserialise {
-    my $str = \@_;
-    my %topic = ( 'TEXT', '' );
+    my $topic;
 
     #convert a string into an array
-    if ( $#$str == 0 ) {
-        @$str = split( /\n/, $$str[0] );
+    if ( $#_ == 0 ) {
+        return deserialise(split( /\n/, $_[0] ));
     }
     
     my $start = 0;
     my $end = -1;
 
+    #I can test $_[$start] rather than defined($_[$start]) 
+    #  because an empty line still would not match the regex
     # first get rid of the leading META
-    if ( defined( $$str[$start] ) && $$str[$start] =~ $METAINFOregex) {
-            $topic{$1} = _readKeyValues($2);
+    if ( $_[$start] && $_[$start] =~ $METAINFOregex) {
+            $topic->{$1} = _readKeyValues($2);
             $start++;
     }
-    if ( defined( $$str[$start] ) && $$str[$start] =~ $METAPARENTregex) {
-            $topic{$1} = _readKeyValues($2);
+    if ( $_[$start] && $_[$start] =~ $METAPARENTregex) {
+            $topic->{$1} = _readKeyValues($2);
             $start++;
     }
 
     #then the trailing META
     my $trailingMeta;
-    while ( ( $$str[$end] ) && $$str[$end] =~ $METAregex ) {
+    while ( $_[$end] && $_[$end] =~ $METAregex ) {
         #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
         last if (($1 eq 'TOPICINFO') || ($1 eq 'TOPICPARENT'));
 
@@ -102,37 +103,37 @@ sub deserialise {
 
         my $meta = _readKeyValues($2);
         if ( $1 eq 'FORM' ) {
-            $topic{$1} = $meta;
+            $topic->{$1} = $meta;
         }
         else {
             if ( exists( $meta->{name} ) && $1 ne 'FORM') {
-                $topic{$1}{ $meta->{name} } = $meta;
+                $topic->{$1}{ $meta->{name} } = $meta;
             }
             else {
-                $topic{$1} = $meta;
+                $topic->{$1} = $meta;
             }
         }
     }
 
     #there is an extra newline added between TEXT and any trailing meta
-    $end-- if ( $trailingMeta && $$str[$end] =~ /^\n?$/ );
-    my @text = @$str[$start, $end];
+    $end-- if ( $trailingMeta && $_[$end] =~ /^\n?$/o );
+    my @text = @_[$start, $end];
 
     #and thus we're left with the topic text
     if ( defined( $text[0] ) ) {
 
         #decide if the TEXT array already has \n at the ends
         my $separator = "\n";
-        $separator = '' if ( $$str[0] =~ /\n/ );
-        $topic{TEXT} = join( $separator, @text );
-        #$topic{TEXT} = \@text;
+        $separator = '' if ( $_[0] =~ /\n/o );
+        $topic->{TEXT} = join( $separator, @text );
+        #$topic->{TEXT} = \@text;
     }
     else {
 
-        #        $topic{TEXT} = '';
+        $topic->{TEXT} = '';
     }
 
-    return \%topic;
+    return $topic;
 }
 
 =head2 serialise($hashref) -> string
@@ -177,15 +178,16 @@ sub serialise {
 # SMELL: duplication of Foswiki::Attrs, using a different
 # system of escapes :-(
 sub _readKeyValues {
-    my $args = shift;
-    my %res;
-
-    # Format of data is name='value' name1='value1' [...]
-    $args =~ s/\s*([^=]+)="([^"]*)"/
-      $res{$1} = _dataDecode( $2 ), ''/geo;
-    
-
-    return \%res;
+    my @arr = split(/="([^"]*)"\s*/, $_[0]);
+    #if the last attribute is an empty string, we're a bit naf
+    push(@arr, '') unless ($#arr % 2);
+    my $res = {@arr};
+    while (my ($key, $value) = each(%$res)) {
+        if ($value =~ s/%([\da-f]{2})/chr(hex($1))/geio) {
+            $res->{$key} = $value;
+        }
+    }
+    return $res;
 }
 
 sub _writeMeta {

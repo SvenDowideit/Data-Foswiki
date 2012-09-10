@@ -6,11 +6,11 @@ use Test::More;
 use Carp;
 use Data::Dumper;
 use Data::Foswiki;
-use Data::Foswiki::Test;
-use Data::Foswiki::Test2;
-use Data::Foswiki::Test3;
-use Data::Foswiki::Test3;
+#use Data::Foswiki::Test;
+#use Data::Foswiki::Test2;
+#use Data::Foswiki::Test3;
 use Data::Foswiki::Test4;
+use Data::Foswiki::Test5;
 
 eval {
     require Benchmark;
@@ -62,16 +62,16 @@ my $results = timethese(
 #                my $data = Data::Foswiki::Test2::deserialise(@$topic);
 #            }
 #        },
-        'Foswiki::Test3::deserialise' =>
-          sub { 
-            foreach my $topic (@topics) {
-                my $data = Data::Foswiki::Test3::deserialise(@$topic);
-            }
-        },
         'Foswiki::Test4::deserialise' =>
           sub { 
             foreach my $topic (@topics) {
                 my $data = Data::Foswiki::Test4::deserialise(@$topic);
+            }
+        },
+        'Foswiki::Test5::deserialise' =>
+          sub { 
+            foreach my $topic (@topics) {
+                my $data = Data::Foswiki::Test5::deserialise(@$topic);
             }
         },
     },
