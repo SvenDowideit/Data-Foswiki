@@ -70,30 +70,31 @@ my $METAPARENTregex = qr/^\%META:(TOPICPARENT){(.*)}\%\n?$/o;
 my $METAregex = qr/^\%META:(\S*){(.*)}\%\n?$/o;
 
 sub deserialise {
-    my $str = \@_;
-    my %topic = ( 'TEXT', '' );
+    my $topic;
 
     #convert a string into an array
-    if ( $#$str == 0 ) {
-        @$str = split( /\n/, $$str[0] );
+    if ( $#_ == 0 ) {
+        return deserialise(split( /\n/, $_[0] ));
     }
     
     my $start = 0;
     my $end = -1;
 
+    #I can test $_[$start] rather than defined($_[$start]) 
+    #  because an empty line still would not match the regex
     # first get rid of the leading META
-    if ( defined( $$str[$start] ) && $$str[$start] =~ $METAINFOregex) {
-            $topic{$1} = _readKeyValues($2);
+    if ( $_[$start] && $_[$start] =~ $METAINFOregex) {
+            $topic->{$1} = _readKeyValues($2);
             $start++;
     }
-    if ( defined( $$str[$start] ) && $$str[$start] =~ $METAPARENTregex) {
-            $topic{$1} = _readKeyValues($2);
+    if ( $_[$start] && $_[$start] =~ $METAPARENTregex) {
+            $topic->{$1} = _readKeyValues($2);
             $start++;
     }
 
     #then the trailing META
     my $trailingMeta;
-    while ( ( $$str[$end] ) && $$str[$end] =~ $METAregex ) {
+    while ( $_[$end] && $_[$end] =~ $METAregex ) {
         #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
         last if (($1 eq 'TOPICINFO') || ($1 eq 'TOPICPARENT'));
 
@@ -102,37 +103,27 @@ sub deserialise {
 
         my $meta = _readKeyValues($2);
         if ( $1 eq 'FORM' ) {
-            $topic{$1} = $meta;
+            $topic->{$1} = $meta;
         }
         else {
             if ( exists( $meta->{name} ) && $1 ne 'FORM') {
-                $topic{$1}{ $meta->{name} } = $meta;
+                $topic->{$1}{ $meta->{name} } = $meta;
             }
             else {
-                $topic{$1} = $meta;
+                $topic->{$1} = $meta;
             }
         }
     }
 
     #there is an extra newline added between TEXT and any trailing meta
-    $end-- if ( $trailingMeta && $$str[$end] =~ /^\n?$/ );
-    my @text = @$str[$start, $end];
-
-    #and thus we're left with the topic text
-    if ( defined( $text[0] ) ) {
-
-        #decide if the TEXT array already has \n at the ends
-        my $separator = "\n";
-        $separator = '' if ( $$str[0] =~ /\n/ );
-        $topic{TEXT} = join( $separator, @text );
-        #$topic{TEXT} = \@text;
+    $end-- if ( $trailingMeta && $_[$end] =~ /^\n?$/o );
+    
+    if ($_[$start]) {
+        #TODO: not joining and just returning an arrayref is ~200 topics/s faster again
+        #but leaves the user to work out if there are \n's
+        $topic->{TEXT} = join((( $_[$start] =~ /\n/o )?'':"\n"), @_[$start, $end]);
     }
-    else {
-
-        #        $topic{TEXT} = '';
-    }
-
-    return \%topic;
+    return $topic;
 }
 
 =head2 serialise($hashref) -> string
@@ -177,15 +168,17 @@ sub serialise {
 # SMELL: duplication of Foswiki::Attrs, using a different
 # system of escapes :-(
 sub _readKeyValues {
-    my $args = shift;
-    my %res;
+    my @arr = split(/="([^"]*)"\s*/, $_[0]);
+    #if the last attribute is an empty string, we're a bit naf
+    my $count = $#arr;
+    push(@arr, '') unless ($count % 2);
+    my $res;
+    for (my $i=1;$i<=$count;$i=$i+2) {
+        $arr[$i] =~ s/%([\da-f]{2})/chr(hex($1))/geio;
+        $res->{$arr[$i-1]} = $arr[$i];
+    }
 
-    # Format of data is name='value' name1='value1' [...]
-    $args =~ s/\s*([^=]+)="([^"]*)"/
-      $res{$1} = _dataDecode( $2 ), ''/geo;
-    
-
-    return \%res;
+    return $res;
 }
 
 sub _writeMeta {

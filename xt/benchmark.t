@@ -7,17 +7,14 @@ use Carp;
 use Data::Dumper;
 use Data::Foswiki;
 #use Data::Foswiki::Test;
-#use Data::Foswiki::Test2;
-#use Data::Foswiki::Test3;
-use Data::Foswiki::Test4;
-use Data::Foswiki::Test5;
 
 eval {
     require Benchmark;
-    Benchmark->import(qw( timethese cmpthese :hireswallclock));
+    Benchmark->import(qw( timestr countit timethese cmpthese :hireswallclock));
 };
 
 plan skip_all => "Benchmark module needed for this test" if $@;
+plan tests => 1;
 
 my @topicList = qw(
   /var/lib/foswiki/data/System/ReleaseNotes01x01.txt
@@ -42,42 +39,35 @@ foreach my $file (@topicList) {
 }
 
 # ...or in two stages
-my $results = timethese(
-    -10,
-    {
-        'Foswiki::deserialise' => sub {
+if (1==2) {
+    my $results = timethese(
+        -10,
+        {
+            'Foswiki::deserialise' => sub {
+                foreach my $topic (@topics) {
+                    my $data = Data::Foswiki::deserialise(@$topic);
+                }
+            },
+    #        'Foswiki::Test::deserialise' =>
+    #          sub { 
+    #            foreach my $topic (@topics) {
+    #                my $data = Data::Foswiki::Test::deserialise(@$topic);
+    #            }
+    #        },
+        },
+        'none'
+    );
+
+    #print STDERR Dumper($results);
+}
+
+my $t = countit(5, sub {
             foreach my $topic (@topics) {
                 my $data = Data::Foswiki::deserialise(@$topic);
             }
-        },
-#        'Foswiki::Test::deserialise' =>
-#          sub { 
-#            foreach my $topic (@topics) {
-#                my $data = Data::Foswiki::Test::deserialise(@$topic);
-#            }
-#        },
-#        'Foswiki::Test2::deserialise' =>
-#          sub { 
-#            foreach my $topic (@topics) {
-#                my $data = Data::Foswiki::Test2::deserialise(@$topic);
-#            }
-#        },
-        'Foswiki::Test4::deserialise' =>
-          sub { 
-            foreach my $topic (@topics) {
-                my $data = Data::Foswiki::Test4::deserialise(@$topic);
-            }
-        },
-        'Foswiki::Test5::deserialise' =>
-          sub { 
-            foreach my $topic (@topics) {
-                my $data = Data::Foswiki::Test5::deserialise(@$topic);
-            }
-        },
-    },
-    'none'
-);
-my $rows = cmpthese($results);
-print STDERR Dumper($rows);
+            });
+my $count = $t->iters;
+print STDERR "$count loops of other code took:",timestr($t),"\n";
+ok($count > 4000, 'too slow');
 
 1;
