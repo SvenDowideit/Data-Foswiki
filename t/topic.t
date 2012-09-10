@@ -4,8 +4,7 @@ use strict;
 use Test::More tests => 9;
 
 #test only importing deserialise - make the other full
-use Data::Foswiki;
-use Data::Foswiki::Test5 qw(deserialise);
+use Data::Foswiki qw(deserialise);
 
 my $topic;
 $topic = deserialise();
