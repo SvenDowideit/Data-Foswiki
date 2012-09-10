@@ -42,6 +42,7 @@
 \.tmp$
 \.#
 \.rej$
+\.tdy$
 
 # Avoid OS-specific files/dirs
 # Mac OSX metadata
@@ -71,3 +72,6 @@
 
 # Avoid archives of this distribution
 \bData-Foswiki-[\d\.\_]+
+
+#avoid nytprof output!
+nytprof

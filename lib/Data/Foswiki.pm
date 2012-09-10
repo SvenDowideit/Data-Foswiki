@@ -102,7 +102,7 @@ sub deserialise {
         pop(@str);
 
         #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
-        next if (($type eq 'TOPICINFO') || ($type eq 'TOPICINFO'));
+        next if (($type eq 'TOPICINFO') || ($type eq 'TOPICPARENT'));
 
         my %meta;
         if ( $type eq 'FORM' ) {

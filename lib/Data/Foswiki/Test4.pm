@@ -1,4 +1,4 @@
-package Data::Foswiki::Test;
+package Data::Foswiki::Test4;
 
 use 5.006;
 use strict;
@@ -9,7 +9,7 @@ our @EXPORT_OK = qw(serialise deserialise);
 
 =head1 NAME
 
-Data::Foswiki::Test - Read and Write Foswiki topics
+Data::Foswiki::Test4 - Read and Write Foswiki topics
 
 =head1 VERSION
 
@@ -23,14 +23,14 @@ our $VERSION = '0.01';
 
 Quickly read and write Foswiki topics into a hash
 
-    use Data::Foswiki::Test;
+    use Data::Foswiki::Test4;
 
     #read
     my $fh;
     open($fh, '<', '/var/lib/foswiki/data/System/FAQSimultaneousEdits.txt') or die 'open failure';
     my @topic_text = <$fh>;
     close($fh);
-    my $topic = Data::Foswiki::Test::deserialise(@topic_text);
+    my $topic = Data::Foswiki::Test2::deserialise(@topic_text);
     
     $topic->{TOPICINFO}{author} = 'NewUser';
     $topic->{PARENT}{name} = 'WebHome';
@@ -65,75 +65,67 @@ Parse a string, or array of strings and convert into a hash of the Foswiki topic
 
 =cut
 
+my $METAINFOregex = qr/^\%META:(TOPICINFO){(.*)}\%\n?$/o;
+my $METAPARENTregex = qr/^\%META:(TOPICPARENT){(.*)}\%\n?$/o;
+my $METAregex = qr/^\%META:(\S*){(.*)}\%\n?$/o;
+
 sub deserialise {
-    my @str = @_;
+    my $str = \@_;
     my %topic = ( 'TEXT', '' );
 
     #convert a string into an array
-    if ( $#str == 0 ) {
-        @str = split( /\n/, $str[0] );
+    if ( $#$str == 0 ) {
+        @$str = split( /\n/, $$str[0] );
     }
     
     my $start = 0;
     my $end = -1;
 
     # first get rid of the leading META
-    if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICINFO){(.*?)}\%\n?$/ ) {
-        my $type   = $1;
-        my $params = $2;
-        my %meta;
-        _parse_params( $type, $params, \%meta, qw/author date version format/ );
-        $topic{$type} = \%meta;
-        $start++;
+    if ( defined( $$str[$start] ) && $$str[$start] =~ $METAINFOregex) {
+            $topic{$1} = _readKeyValues($2);
+            $start++;
     }
-    if ( defined( $str[$start] ) && $str[$start] =~ /\%META:(TOPICPARENT){(.*?)}\%\n?$/ )
-    {
-        my $type   = $1;
-        my $params = $2;
-        my %meta;
-        _parse_params( $type, $params, \%meta, qw/name/ );
-        $topic{$type} = \%meta;
-        $start++;
+    if ( defined( $$str[$start] ) && $$str[$start] =~ $METAPARENTregex) {
+            $topic{$1} = _readKeyValues($2);
+            $start++;
     }
 
     #then the trailing META
     my $trailingMeta;
-    while ( ( $str[$end] ) && $str[$end] =~ /\%META:(.*?){(.*?)}\%\n?$/ ) {
+    while ( ( $$str[$end] ) && $$str[$end] =~ $METAregex ) {
+        #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
+        last if (($1 eq 'TOPICINFO') || ($1 eq 'TOPICPARENT'));
+
         $trailingMeta = 1;
-        my $type   = $1;
-        my $params = $2;
         $end--;
 
-        #should skip any TOPICINFO & TOPICPARENT, they are _only_ valid in one place in the file.
-        next if (($type eq 'TOPICINFO') || ($type eq 'TOPICPARENT'));
-
-        my %meta;
-        if ( $type eq 'FORM' ) {
-            _parse_params( $type, $params, \%meta, qw/name/ );
-            $topic{$type} = \%meta;
+        my $meta = _readKeyValues($2);
+        if ( $1 eq 'FORM' ) {
+            $topic{$1} = $meta;
         }
         else {
-            _parse_params( $type, $params, \%meta );
-            if ( exists( $meta{name} ) ) {
-                $topic{$type}{ $meta{name} } = \%meta;
+            if ( exists( $meta->{name} ) && $1 ne 'FORM') {
+                $topic{$1}{ $meta->{name} } = $meta;
             }
             else {
-                $topic{$type} = \%meta;
+                $topic{$1} = $meta;
             }
         }
     }
 
     #there is an extra newline added between TEXT and any trailing meta
-    $end-- if ( $trailingMeta && $str[$end] =~ /^\n?$/ );
-    my @text = @str[$start, $end];
+    $end-- if ( $trailingMeta && $$str[$end] =~ /^\n?$/ );
+    my @text = @$str[$start, $end];
 
     #and thus we're left with the topic text
     if ( defined( $text[0] ) ) {
 
         #decide if the TEXT array already has \n at the ends
         my $separator = "\n";
-        $separator = '' if ( $str[0] =~ /\n/ );
+        $separator = '' if ( $$str[0] =~ /\n/ );
         $topic{TEXT} = join( $separator, @text );
+        #$topic{TEXT} = \@text;
     }
     else {
 
@@ -180,18 +172,6 @@ sub serialise {
     return join( "\n", @text );
 }
 
-sub _parse_params {
-    my ( $metaname, $str, $meta, @attrs ) = @_;
-    my $args = _readKeyValues($str);
-    if ( $#attrs >= 0 ) {
-        map { $meta->{$_} = $args->{$_} if ( exists( $args->{$_} ) ); } @attrs;
-    }
-    else {
-        map { $meta->{$_} = $args->{$_} } keys(%$args);
-    }
-    return;
-}
-
 #from Foswiki::Meta
 # STATIC Build a hash by parsing name=value comma separated pairs
 # SMELL: duplication of Foswiki::Attrs, using a different
@@ -202,7 +182,7 @@ sub _readKeyValues {
 
     # Format of data is name='value' name1='value1' [...]
     $args =~ s/\s*([^=]+)="([^"]*)"/
-      $res{$1} = _dataDecode( $2 ), ''/ge;
+      $res{$1} = _dataDecode( $2 ), ''/geo;
 
     return \%res;
 }

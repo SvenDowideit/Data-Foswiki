@@ -9,6 +9,8 @@ use Data::Foswiki;
 use Data::Foswiki::Test;
 use Data::Foswiki::Test2;
 use Data::Foswiki::Test3;
+use Data::Foswiki::Test3;
+use Data::Foswiki::Test4;
 
 eval {
     require Benchmark;
@@ -41,29 +43,35 @@ foreach my $file (@topicList) {
 
 # ...or in two stages
 my $results = timethese(
-    -4,
+    -10,
     {
         'Foswiki::deserialise' => sub {
             foreach my $topic (@topics) {
                 my $data = Data::Foswiki::deserialise(@$topic);
             }
         },
-        'Foswiki::Test::deserialise' =>
-          sub { 
-            foreach my $topic (@topics) {
-                my $data = Data::Foswiki::Test::deserialise(@$topic);
-            }
-        },
-        'Foswiki::Test2::deserialise' =>
-          sub { 
-            foreach my $topic (@topics) {
-                my $data = Data::Foswiki::Test2::deserialise(@$topic);
-            }
-        },
+#        'Foswiki::Test::deserialise' =>
+#          sub { 
+#            foreach my $topic (@topics) {
+#                my $data = Data::Foswiki::Test::deserialise(@$topic);
+#            }
+#        },
+#        'Foswiki::Test2::deserialise' =>
+#          sub { 
+#            foreach my $topic (@topics) {
+#                my $data = Data::Foswiki::Test2::deserialise(@$topic);
+#            }
+#        },
         'Foswiki::Test3::deserialise' =>
           sub { 
             foreach my $topic (@topics) {
                 my $data = Data::Foswiki::Test3::deserialise(@$topic);
+            }
+        },
+        'Foswiki::Test4::deserialise' =>
+          sub { 
+            foreach my $topic (@topics) {
+                my $data = Data::Foswiki::Test4::deserialise(@$topic);
             }
         },
     },
