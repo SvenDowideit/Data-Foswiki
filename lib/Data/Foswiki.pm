@@ -237,6 +237,25 @@ sub _writeMeta {
     my $type = shift;
     my $hash = shift;
 
+    my ($k, $v) = each(%$hash);
+    if (ref($v) eq 'HASH') {
+        $hash = $v;
+    }
+    
+    my $string = '%META:' . $type . '{';
+    $string .= 'name="'.$hash->{name}.'" ' if (defined($hash->{name}));
+    foreach (keys %$hash) {
+        next if ($_ eq 'name');
+        $string .= $_.'="'.$hash->{$_}.'" ';
+    }
+    #chop($string);
+    
+    $string.= '}%';
+#use Data::Dumper;
+#print STDERR ":::::".scalar(keys(%$hash))."::".Dumper($hash)."\n$string\n";
+    return $string;
+    ##################old code
+
     my @elements = _writeKeyValues( $type, $hash );
 #use Data::Dumper;
 #die "=====$type --".Dumper($hash)."--".Dumper(\@elements)."--\n" if (!defined($elements[0]));
@@ -250,10 +269,9 @@ sub _writeKeyValues {
     my $type = shift;
     my $hash = shift;
 
+    my $name;
     return map {
 
-        #        if (exists($hash->{$_}{name}) && $hash->{$_}{name} eq $_) {
-        #print STDERR "---".$hash->{$_}."-".ref($hash->{$_})."--\n";
         if ( ref( $hash->{$_} ) eq 'HASH' ) {
 
             #META:TYPE{name=} hash of entries
