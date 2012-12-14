@@ -49,12 +49,6 @@ Quickly read and write Foswiki topics into a hash
     print $fh Data::Foswiki::Test::serialise($topic);
     close($fh);
     
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
 =head1 SUBROUTINES/METHODS
 
 =head2 deserialise($text|@stringarray) -> $hash_ref
@@ -155,8 +149,9 @@ sub deserialise {
 
     if ( defined($_[$start]) ) {
 
- #TODO: not joining and just returning an arrayref is ~200 topics/s faster again
+ #TODO: not joining and just returning an arrayref is very much faster
  #but leaves the user to work out if there are \n's
+ #perhaps this is a reson to wrap it in a class and provide a text() :/
         $topic->{TEXT} =
           join( ( ( $_[$start] =~ /\n/o ) ? '' : "\n" ), @_[ $start .. $#_ + $end + 1 ] );
         #I'm not 100% sure about this, but if there's no trailing META, the unit tests suggest we need to add a \n
