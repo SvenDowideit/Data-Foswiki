@@ -32,7 +32,7 @@ SYNOPSIS
         open($fh, '>', '/var/lib/foswiki/data/System/FAQNewFaq.txt') or die 'write failure';
         print $fh Data::Foswiki::Test::serialise($topic);
         close($fh);
-
+    
 EXPORT
     A list of functions that can be exported. You can delete this section if
     you don't export anything, such as for a purely object-oriented module.
@@ -44,6 +44,8 @@ SUBROUTINES/METHODS
 
     (apparently Perl can be faster reading a file into an array)
 
+    if you pass in an undef / empty string, you will get undef back
+
   serialise($hashref) -> string
     Serialise into a foswiki 'embedded' formatted string, ready for writing
     to disk.
@@ -52,19 +54,18 @@ SUBROUTINES/METHODS
     data
 
 AUTHOR
-    Sven Dowideit, "<SvenDowideit at fosiki.com>"
+    Sven Dowideit, `<SvenDowideit at fosiki.com>'
 
 BUGS
-    Please report any bugs or feature requests to "bug-data-foswiki at
-    rt.cpan.org", or through the web interface at
-    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Data-Foswiki>. I will be
+    Please report any bugs or feature requests to `bug-data-foswiki at
+    rt.cpan.org', or through the web interface at
+    http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Data-Foswiki. I will be
     notified, and then you'll automatically be notified of progress on your
     bug as I make changes.
 
 SUPPORT
-    Foswiki support can be found in the #foswiki irc channel on
-    <irc://irc.freenode.net>, or from SvenDowideit
-    <mailto:SvenDowideit@fosiki.com>
+    Foswiki support can be found in the #foswiki irc channel on irc:, or
+    from SvenDowideit mailto:SvenDowideit@fosiki.com
 
 ACKNOWLEDGEMENTS
 TO DO

@@ -236,21 +236,29 @@ sub _readKeyValues {
 sub _writeMeta {
     my $type = shift;
     my $hash = shift;
+    my $string = '';
 
-    my ($k, $v) = each(%$hash);
-    if (ref($v) eq 'HASH') {
-        $hash = $v;
+    while(my ($k, $v) = each(%$hash)) {
+        if (ref($v) eq 'HASH') {
+            $string .= "\n" if ($string ne '');
+            $string .= _writeMeta($type, $v);
+        } else {
+            #not a multi-value META (ie, TOPICINFO, TOPICPARENT, FORM)
+            last;
+        }
     }
     
-    my $string = '%META:' . $type . '{';
-    $string .= 'name="'.$hash->{name}.'" ' if (defined($hash->{name}));
-    foreach (keys %$hash) {
-        next if ($_ eq 'name');
-        $string .= $_.'="'.$hash->{$_}.'" ';
+    if ($string eq '') {
+        $string .= '%META:' . $type . '{';
+        $string .= 'name="'.$hash->{name}.'" ' if (defined($hash->{name}));
+        foreach (keys %$hash) {
+            next if ($_ eq 'name');
+            $string .= $_.'="'._dataEncode( $hash->{$_} ).'" ';
+        }
+        #chop($string);
+        
+        $string.= '}%';
     }
-    #chop($string);
-    
-    $string.= '}%';
 #use Data::Dumper;
 #print STDERR ":::::".scalar(keys(%$hash))."::".Dumper($hash)."\n$string\n";
     return $string;
