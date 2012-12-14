@@ -17,7 +17,7 @@ Version 0.02
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -84,14 +84,16 @@ sub deserialise {
     if ( $#_ == 0 ) {
         return $topic if ( $_[0] eq '' );
         if ( $_[0] =~ /\n/ ) {
-            return deserialise( split( /\n/, $_[0].'SVENWASHERE' ) );
+            my @lines = split( /\n/, $_[0] );
+            #split will not give you an empty trailing array element if \n is the last char in the string
+            #TODO: do i really need to make a copy of the array?
+            push(@lines, '') if ($_[0] =~ m/\n$/);
+            return deserialise( @lines );
         }
     }
 
     my $start = 0;
     my $end   = -1;
-    #split will not give you an empty trailing array element if \n is the last char in the string
-    $_[$end] =~ s/SVENWASHERE//;
 
     #I can test $_[$start] rather than defined($_[$start])
     #  because an empty line still would not match the regex
