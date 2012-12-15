@@ -11,13 +11,7 @@ our @EXPORT_OK = qw(serialise deserialise);
 
 Data::Foswiki - Read and Write Foswiki topics
 
-=head1 VERSION
-
-Version 0.02
-
 =cut
-
-our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
